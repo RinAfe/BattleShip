@@ -1,7 +1,14 @@
+#include "Board.h"
+
+int main(){
 
 
-int main() {
+    Board test;
 
+    test.printBoard();
 
+    test.setShip(' ');
+
+    test.printBoard();
 
 }

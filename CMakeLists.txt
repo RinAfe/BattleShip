@@ -3,7 +3,7 @@ project(battleship)
 
 set(CMAKE_CXX_STANDARD 20)
 
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/*.cpp" "src/ui/Board.cpp")
 file(GLOB HEADERS "include/*.h")
 
 add_executable(battleship ${SOURCES} ${HEADERS})
