@@ -178,3 +178,92 @@ char ConsoleView::getPlacementOrientation() {
 void ConsoleView::showAllShipsPlaced() {
     std::cout << "Все корабли размещены!\n";
 }
+
+void ConsoleView::greetingMenu() {
+    std::cout << "Добро пожаловать в игру Морской Бой!" << std::endl;
+    std::cout << "1. Авторизация" << std::endl;
+    std::cout << "2. Регистрация" << std::endl;
+    std::cout << "Выберите действие(1/2): ";
+}
+
+void ConsoleView::incorrectAnswerInMenu() {
+    std::cout << "Неверное число, пожалуйста, введите корректное число(1/2): ";
+}
+
+void ConsoleView::authorization() {
+    std::cout << "Введите свою почту: ";
+}
+
+void ConsoleView::registrationName() {
+    std::cout << "Введите свое имя: " << std::endl;
+}
+
+void ConsoleView::registrationEmail() {
+    std::cout << "Введите свою почту: " << std::endl;
+}
+
+void ConsoleView::emailAlrdeadyRegistered() {
+    std::cout << "Такой email уже зарегистрирован. Авторизоваться?" << std::endl;
+    std::cout << "1 - Да\n2 - Нет: ";
+}
+
+void ConsoleView::incorrectAnswerInRegister() {
+    std::cout << "Неправильная цифра, желаете авторизоваться?" << std::endl;
+    std::cout << "1 - Да\n2 - Нет: ";
+}
+
+void ConsoleView::registrationSuccess() {
+    std::cout << "Регистрация успешно завершена!" << std::endl;
+}
+
+void ConsoleView::registrationFailed() {
+    std::cout << "Ошибка при регистрации. Попробуйте снова." << std::endl;
+}
+
+void ConsoleView::authorizationSuccess() {
+    std::cout << "Авторизация успешна! Добро пожаловать!" << std::endl;
+}
+
+void ConsoleView::authorizationFailed() {
+    std::cout << "Ошибка авторизации. Неверный email." << std::endl;
+}
+
+void ConsoleView::askForNewEmail() {
+    std::cout << "Введите другой email для регистрации: " << std::endl;
+}
+
+void ConsoleView::errorToLoginInSystem() {
+    std::cout << "Не удалось войти в систему. Выход." << std::endl;
+}
+
+void ConsoleView::player1Welcome() {
+    std::cout << "\n=== ИГРОК 1 ===" << std::endl;
+}
+
+void ConsoleView::player2Welcome() {
+    std::cout << "\n=== ИГРОК 2 ===" << std::endl;
+}
+
+void ConsoleView::bothPlayersAuthorized() {
+    std::cout << "\nОба игрока авторизованы! Начинаем игру..." << std::endl;
+}
+
+void ConsoleView::switchingPlayers() {
+    std::cout << "\nПередача хода другому игроку..." << std::endl;
+    std::cout << "Нажмите Enter, чтобы продолжить...";
+    std::cin.ignore();
+    std::cin.get();
+}
+
+void ConsoleView::playerTurn(int playerNumber) {
+    std::cout << "\n=== ХОД ИГРОКА " << playerNumber << " ===" << std::endl;
+}
+
+void ConsoleView::messageExistingGame() {
+    std::cout << "Загрузка незавершенной игры..." << std::endl;
+}
+
+void ConsoleView::gameIsOver() {
+    std::cout << "Игра окончена!" << std::endl;
+}
+

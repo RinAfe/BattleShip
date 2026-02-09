@@ -8,6 +8,7 @@ file(GLOB_RECURSE SOURCES
         "src/players/*.cpp"
         "src/model/*.cpp"
         "src/game/*.cpp"
+        "src/sql/*.cpp"
 )
 file(GLOB HEADERS "include/*.h")
 

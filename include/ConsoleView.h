@@ -22,7 +22,6 @@ public:
 
     void printBoardForPlacement(Board& board) const;
 
-    //GLOBAL_CONSOLE
     void startConsole();
     void incorrectStartMode();
     void newMove();
@@ -34,4 +33,27 @@ public:
     std::string getPlacementCoordinates();
     char getPlacementOrientation();
     void showAllShipsPlaced();
+
+    void greetingMenu();
+    void incorrectAnswerInMenu();
+    void authorization();
+    void registrationName();
+    void registrationEmail();
+    void emailAlrdeadyRegistered();
+    void incorrectAnswerInRegister();
+    void registrationSuccess();
+    void registrationFailed();
+    void authorizationSuccess();
+    void authorizationFailed();
+    void askForNewEmail();
+    void errorToLoginInSystem();
+
+    void player1Welcome();
+    void player2Welcome();
+    void bothPlayersAuthorized();
+    void switchingPlayers();
+    void playerTurn(int playerNumber);
+    void messageExistingGame();
+
+    void gameIsOver();
 };
