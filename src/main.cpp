@@ -1,7 +1,8 @@
 #include "BattleShip.h"
-#include "auth.h"
+#include "Auth.h"
 #include <iostream>
 #include <memory>
+#include "DataManager.h"
 
 ConsoleView GLOBAL_CONSOLE;
 
@@ -16,12 +17,17 @@ void continueExistingGame(int gameId) {
 }
 
 int main() {
+
+    DataManager data_manager;
+
+    data_manager.initDataBase();
+
     AuthManager player1Auth(GLOBAL_CONSOLE);
     AuthManager player2Auth(GLOBAL_CONSOLE);
 
     GLOBAL_CONSOLE.player1Welcome();
     if (!player1Auth.authenticate()) {
-        std::cout << "Не удалось войти в систему. Выход." << std::endl;
+        GLOBAL_CONSOLE.errorToLoginInSystem();
         return 1;
     }
 

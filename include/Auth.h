@@ -2,6 +2,7 @@
 
 #include <string>
 #include "ConsoleView.h"
+#include "DataManager.h"
 
 struct PlayerSession {
     int playerId;

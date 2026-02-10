@@ -9,8 +9,13 @@ file(GLOB_RECURSE SOURCES
         "src/model/*.cpp"
         "src/game/*.cpp"
         "src/sql/*.cpp"
+        "src/sql/DataManager.cpp"
 )
-file(GLOB HEADERS "include/*.h")
 
-add_executable(battleship ${SOURCES} ${HEADERS})
+add_executable(battleship ${SOURCES})
 target_include_directories(battleship PRIVATE include)
+
+target_link_libraries(battleship
+        /opt/homebrew/lib/libpqxx.dylib
+        /opt/homebrew/lib/postgresql@18/libpq.dylib
+)
