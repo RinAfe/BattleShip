@@ -1,8 +1,0 @@
-//
-// Created by rinat on 11/13/25.
-//
-
-#ifndef BATTLESHIP_GAMEVSCUSTOM_H
-#define BATTLESHIP_GAMEVSCUSTOM_H
-
-#endif //BATTLESHIP_GAMEVSCUSTOM_H
