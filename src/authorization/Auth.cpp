@@ -1,4 +1,4 @@
-#include "auth.h"
+#include "Auth.h"
 #include <iostream>
 #include <limits>
 #include <cstdlib>
@@ -6,7 +6,7 @@
 AuthManager::AuthManager(ConsoleView& consoleRef) : console(consoleRef) {}
 
 bool AuthManager::checkEmailExists(const std::string& email) {
-    // Заглушка для проверки email в БД
+
     return std::rand() % 2 == 0;
 }
 

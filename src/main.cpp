@@ -1,7 +1,8 @@
 #include "BattleShip.h"
-#include "auth.h"
+#include "Auth.h"
 #include <iostream>
 #include <memory>
+#include <Databases.h>
 
 ConsoleView GLOBAL_CONSOLE;
 
@@ -16,6 +17,9 @@ void continueExistingGame(int gameId) {
 }
 
 int main() {
+
+    initDataBase();
+
     AuthManager player1Auth(GLOBAL_CONSOLE);
     AuthManager player2Auth(GLOBAL_CONSOLE);
 
