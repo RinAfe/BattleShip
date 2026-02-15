@@ -5,7 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
-add_executable(battleship ${SOURCES} include/Databases.h)
+add_executable(battleship ${SOURCES} include/Databases.h
+        include/DatabaseConnection.h
+        include/GameSaver.h
+        src/sql/GameSaver.cpp)
 
 target_include_directories(battleship PRIVATE
         include

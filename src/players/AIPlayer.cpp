@@ -1,4 +1,5 @@
 #include "AIPlayer.h"
+#include <cstdlib>
 
 AIPlayer::AIPlayer() {
     AIBoard = std::make_unique<Board>();

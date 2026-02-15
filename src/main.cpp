@@ -1,122 +1,192 @@
 #include "BattleShip.h"
 #include "Auth.h"
+#include "GameSaver.h"
 #include <iostream>
 #include <memory>
 #include <Databases.h>
+#include <pqxx/pqxx>
+#include <vector>
+#include <limits>
 
 ConsoleView GLOBAL_CONSOLE;
 
-bool hasActiveGame(int player1Id, int player2Id) {
-    // Заглушка - в будущем проверка в БД
-    return false;
-}
-
-void continueExistingGame(int gameId) {
-    // Заглушка - загрузка состояния игры из БД
-    GLOBAL_CONSOLE.messageExistingGame();
-}
-
 int main() {
+    pqxx::connection conn("host=localhost port=5432 dbname=battleship user=postgres password=postgres");
+    initDataBases(conn);
 
-    initDataBase();
-
-    AuthManager player1Auth(GLOBAL_CONSOLE);
-    AuthManager player2Auth(GLOBAL_CONSOLE);
+    AuthManager player1Auth(GLOBAL_CONSOLE, conn);
+    AuthManager player2Auth(GLOBAL_CONSOLE, conn);
+    GameSaver gameSaver(conn);
 
     GLOBAL_CONSOLE.player1Welcome();
     if (!player1Auth.authenticate()) {
-        std::cout << "Не удалось войти в систему. Выход." << std::endl;
+        GLOBAL_CONSOLE.errorToLoginInSystem();
         return 1;
     }
 
-    GLOBAL_CONSOLE.startConsole();
+    int playerId = player1Auth.getSession().playerId;
 
-    int mode;
-    std::cin >> mode;
-
-    while (mode < 0 || mode > 2) {
-        GLOBAL_CONSOLE.incorrectStartMode();
+    while (true) {
+        GLOBAL_CONSOLE.showMainMenu();
+        int mode;
         std::cin >> mode;
-    }
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    if (mode == 1) {
-        // Режим против компьютера
-        BattleShip game(mode);
-        while (!game.AIGame->gameIsOver()) {
+        if (mode == 0) {
+            std::cout << "Выход из игры." << std::endl;
+            break;
+        }
+        else if (mode == 1) {
+            BattleShip game(1, true); // true - нужна расстановка кораблей
+
+            int activeGameId = gameSaver.createNewGame(
+                playerId,
+                0, // AI
+                "AI",
+                *game.AIGame->CustomPlayer1->customPlayerBoard,
+                *game.AIGame->AIPlayer1->AIBoard,
+                playerId // первый ход за игроком
+            );
+
+            if (activeGameId == -1) {
+                std::cout << "Ошибка создания игры!" << std::endl;
+                continue;
+            }
+
+            while (!game.AIGame->gameIsOver()) {
+                system("clear");
+
+                GLOBAL_CONSOLE.printBoards(
+                    game.AIGame->CustomPlayer1->customPlayerBoard,
+                    game.AIGame->AIPlayer1->AIBoard
+                );
+
+                game.AIGame->newMove();
+
+                gameSaver.updateGame(activeGameId,
+                    *game.AIGame->CustomPlayer1->customPlayerBoard,
+                    *game.AIGame->AIPlayer1->AIBoard,
+                    game.AIGame->currentTurn);
+            }
+
+            std::string winner;
+            if (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() == 10) {
+                winner = "Bot"; // Победил компьютер
+            } else {
+                winner = player1Auth.getSession().name; // Победил игрок
+            }
+
+            auto savedGame = gameSaver.loadGameById(activeGameId);
+            if (savedGame) {
+                gameSaver.finishGame(savedGame->gameRecordId, winner);
+            }
+
             system("clear");
-
             GLOBAL_CONSOLE.printBoards(
                 game.AIGame->CustomPlayer1->customPlayerBoard,
                 game.AIGame->AIPlayer1->AIBoard
             );
-
-            game.AIGame->newMove();
+            GLOBAL_CONSOLE.gameIsOver();
+            GLOBAL_CONSOLE.pressEnterToContinue();
         }
+        else if (mode == 2) {
+            // Игра с человеком (PvP)
+            GLOBAL_CONSOLE.player2Welcome();
+            if (!player2Auth.authenticate()) {
+                std::cout << "Не удалось авторизовать второго игрока." << std::endl;
+                GLOBAL_CONSOLE.pressEnterToContinue();
+                continue;
+            }
 
-        system("clear");
-        GLOBAL_CONSOLE.printBoards(
-            game.AIGame->CustomPlayer1->customPlayerBoard,
-            game.AIGame->AIPlayer1->AIBoard
-        );
-        GLOBAL_CONSOLE.gameIsOver();
-    }
-    else if (mode == 2) {
+            int player2Id = player2Auth.getSession().playerId;
+            GLOBAL_CONSOLE.bothPlayersAuthorized();
 
-        GLOBAL_CONSOLE.player2Welcome();
-        if (!player2Auth.authenticate()) {
-            std::cout << "Не удалось войти в систему второго игрока. Выход." << std::endl;
-            return 1;
+            std::cout << "\nИгрок 1: " << player1Auth.getSession().name
+                      << " (ID: " << playerId << ")" << std::endl;
+            std::cout << "Игрок 2: " << player2Auth.getSession().name
+                      << " (ID: " << player2Id << ")" << std::endl;
+
+            std::cout << "\nРежим 'Игрок против Игрока' в разработке..." << std::endl;
+            GLOBAL_CONSOLE.pressEnterToContinue();
         }
+        else if (mode == 3) {
+            auto games = gameSaver.getActiveGames(playerId);
 
-        int player1Id = player1Auth.getSession().playerId;
-        int player2Id = player2Auth.getSession().playerId;
+            if (games.empty()) {
+                GLOBAL_CONSOLE.noActiveGames();
+                GLOBAL_CONSOLE.pressEnterToContinue();
+                continue;
+            }
 
-        if (hasActiveGame(player1Id, player2Id)) {
-            std::cout << "\nУ вас есть незавершенная игра!" << std::endl;
-            std::cout << "1. Продолжить игру" << std::endl;
-            std::cout << "2. Начать новую игру" << std::endl;
-            std::cout << "Выберите действие (1/2): ";
+            GLOBAL_CONSOLE.showActiveGamesMenu(games);
 
             int choice;
             std::cin >> choice;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-            if (choice == 1) {
-                // int gameId = database.getActiveGameId(player1Id, player2Id);
-                // continueExistingGame(gameId);
-                std::cout << "Функция продолжения игры в разработке..." << std::endl;
-                return 0;
+            if (choice == 0) {
+                continue;
+            }
+
+            if (choice > 0 && choice <= static_cast<int>(games.size())) {
+                const auto& selectedGame = games[choice - 1];
+
+                if (selectedGame.gameType == "AI") {
+                    auto savedGame = gameSaver.loadGameById(selectedGame.gameId);
+                    if (savedGame) {
+
+                        BattleShip game(1, false);
+
+                        game.AIGame->CustomPlayer1->customPlayerBoard = savedGame->player1Board->clone();
+                        game.AIGame->AIPlayer1->AIBoard = savedGame->player2Board->clone();
+                        game.AIGame->currentTurn = (selectedGame.isMyTurn ? 1 : 2);
+
+                        GLOBAL_CONSOLE.messageExistingGame();
+                        GLOBAL_CONSOLE.pressEnterToContinue();
+
+                        while (!game.AIGame->gameIsOver()) {
+                            system("clear");
+
+                            GLOBAL_CONSOLE.printBoards(
+                                game.AIGame->CustomPlayer1->customPlayerBoard,
+                                game.AIGame->AIPlayer1->AIBoard
+                            );
+
+                            game.AIGame->newMove();
+
+                            gameSaver.updateGame(selectedGame.gameId,
+                                *game.AIGame->CustomPlayer1->customPlayerBoard,
+                                *game.AIGame->AIPlayer1->AIBoard,
+                                game.AIGame->currentTurn);
+                        }
+
+                        // Игра завершена - определяем победителя
+                        std::string winner;
+                        if (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() == 10) {
+                            winner = "Bot";
+                        } else {
+                            winner = player1Auth.getSession().name;
+                        }
+
+                        gameSaver.finishGame(savedGame->gameRecordId, winner);
+
+                        system("clear");
+                        GLOBAL_CONSOLE.printBoards(
+                            game.AIGame->CustomPlayer1->customPlayerBoard,
+                            game.AIGame->AIPlayer1->AIBoard
+                        );
+                        GLOBAL_CONSOLE.gameIsOver();
+                        GLOBAL_CONSOLE.pressEnterToContinue();
+                    }
+                } else {
+                    std::cout << "Продолжение PvP игры в разработке..." << std::endl;
+                    GLOBAL_CONSOLE.pressEnterToContinue();
+                }
             }
         }
-
-        GLOBAL_CONSOLE.bothPlayersAuthorized();
-
-        std::cout << "\nИгрок 1: " << player1Auth.getSession().name
-                  << " (ID: " << player1Auth.getSession().playerId << ")" << std::endl;
-        std::cout << "Игрок 2: " << player2Auth.getSession().name
-                  << " (ID: " << player2Auth.getSession().playerId << ")" << std::endl;
-
-        // Здесь должна быть логика PvP игры
-        std::cout << "\nРежим 'Игрок против Игрока' в разработке..." << std::endl;
-
-        // Временно запускаем игру против компьютера
-        BattleShip game(1);
-        while (!game.AIGame->gameIsOver()) {
-            system("clear");
-
-            GLOBAL_CONSOLE.printBoards(
-                game.AIGame->CustomPlayer1->customPlayerBoard,
-                game.AIGame->AIPlayer1->AIBoard
-            );
-
-            game.AIGame->newMove();
+        else {
+            GLOBAL_CONSOLE.incorrectStartMode();
         }
-
-        system("clear");
-        GLOBAL_CONSOLE.printBoards(
-            game.AIGame->CustomPlayer1->customPlayerBoard,
-            game.AIGame->AIPlayer1->AIBoard
-        );
-        GLOBAL_CONSOLE.gameIsOver();
     }
 
     return 0;

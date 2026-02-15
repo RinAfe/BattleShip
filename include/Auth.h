@@ -1,38 +1,38 @@
 #pragma once
 
 #include <string>
+#include <pqxx/pqxx>
 #include "ConsoleView.h"
 
 struct PlayerSession {
-    int playerId;
+    int playerId = -1;
     std::string name;
     std::string email;
-    bool isAuthenticated;
-
-    PlayerSession() : playerId(0), isAuthenticated(false) {}
+    bool isAuthenticated = false;
 };
 
 class AuthManager {
 private:
     ConsoleView& console;
-    PlayerSession session;
+    pqxx::connection& conn;
+    PlayerSession currentSession;
 
     bool checkEmailExists(const std::string& email);
-    bool registerUser(const std::string& name, const std::string& email, int& userId);
-    bool loginUser(const std::string& email, int& userId);
-    int getValidInput(int min, int max);
-    bool handleRegistration();
-    bool handleLogin();
+    bool registerUser(const std::string& name, const std::string& email);
+    bool loginUser(const std::string& email);
     bool handleLoginWithEmail(const std::string& email);
+    bool handleLogin();
+    bool handleRegistration();
+    int getValidInput(int min, int max);
+
+    bool loadUserInfo(int userId, const std::string& email);
 
 public:
-    AuthManager(ConsoleView& consoleRef);
+    AuthManager(ConsoleView& consoleRef, pqxx::connection& dbConn);
 
     bool authenticate();
 
-    const PlayerSession& getSession() const { return session; }
+    const PlayerSession& getSession() const;
 
     void resetSession();
-
-    bool isAuthenticated() const { return session.isAuthenticated; }
 };

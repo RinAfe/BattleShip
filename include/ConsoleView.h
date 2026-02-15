@@ -1,7 +1,7 @@
 #pragma once
 #include "Board.h"
 #include <iostream>
-
+#include <GameSaver.h>
 
 class ConsoleView {
 
@@ -22,7 +22,10 @@ public:
 
     void printBoardForPlacement(Board& board) const;
 
-    void startConsole();
+    void showMainMenu();
+    void showActiveGamesMenu(const std::vector<ActiveGameInfo>& games);
+    void noActiveGames();
+    void pressEnterToContinue();
     void incorrectStartMode();
     void newMove();
 
@@ -54,6 +57,9 @@ public:
     void switchingPlayers();
     void playerTurn(int playerNumber);
     void messageExistingGame();
+
+    void invalidEmail() const;
+    void nameTooLong() const;
 
     void gameIsOver();
 };

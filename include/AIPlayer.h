@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Player.h"
+#include "Board.h"
+#include <memory>
 
-class AIPlayer : public Player {
-
+class AIPlayer {
 public:
     std::unique_ptr<Board> AIBoard;
+
     AIPlayer();
-    void makeMove(Board& enemyBoard) override;
+    void makeMove(Board& enemyBoard);
 };

@@ -1,3 +1,3 @@
-#include <pqxx/pqxx>
+#include "DatabaseConnection.h"
 
-void initDataBase();
+void initDataBases(pqxx::connection& conn);

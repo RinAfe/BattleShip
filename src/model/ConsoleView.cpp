@@ -108,14 +108,6 @@ void ConsoleView::incorrectChoseInMenu() {
     std::cout << "Неверное число, введите еще раз: ";
 }
 
-void ConsoleView::startConsole() {
-    std::cout << "Привет! Для продолжения необходимо выбрать соперника!" << std::endl;
-    std::cout << "1 - Компьютер" << std::endl;
-    std::cout << "2 - Человек" << std::endl;
-    std::cout << "0 - Выход" << std::endl;
-    std::cout << "Введите число: ";
-}
-
 void ConsoleView::incorrectStartMode() {
     std::cout << "Неверное число, попробуйте еще раз!" << std::endl;
     std::cout << "Введите число: ";
@@ -261,6 +253,51 @@ void ConsoleView::playerTurn(int playerNumber) {
 
 void ConsoleView::messageExistingGame() {
     std::cout << "Загрузка незавершенной игры..." << std::endl;
+}
+
+void ConsoleView::invalidEmail() const {
+    std::cout << "Неверный формат email! Email должен содержать символ '@'." << std::endl;
+}
+
+void ConsoleView::nameTooLong() const {
+    std::cout << "Имя слишком длинное! Максимальная длина - 10 символов." << std::endl;
+}
+
+void ConsoleView::showMainMenu() {
+    std::cout << "\n=== ГЛАВНОЕ МЕНЮ ===" << std::endl;
+    std::cout << "1 - Игра с компьютером" << std::endl;
+    std::cout << "2 - Игра с человеком" << std::endl;
+    std::cout << "3 - Список активных игр" << std::endl;
+    std::cout << "0 - Выход" << std::endl;
+    std::cout << "Выберите режим: ";
+}
+
+void ConsoleView::showActiveGamesMenu(const std::vector<ActiveGameInfo>& games) {
+    std::cout << "\n=== АКТИВНЫЕ ИГРЫ ===" << std::endl;
+
+    for (size_t i = 0; i < games.size(); i++) {
+        std::cout << i + 1 << ". Против: " << games[i].opponentName;
+
+        if (games[i].gameType == "AI") {
+            std::cout << " (компьютер)";
+        } else {
+            std::cout << " (игрок)";
+        }
+
+        std::cout << " - " << (games[i].isMyTurn ? "ТВОЙ ХОД" : "ХОД ПРОТИВНИКА");
+        std::cout << std::endl;
+    }
+    std::cout << "0 - Назад в главное меню" << std::endl;
+    std::cout << "Выберите игру: ";
+}
+
+void ConsoleView::noActiveGames() {
+    std::cout << "У вас нет незавершенных игр." << std::endl;
+}
+
+void ConsoleView::pressEnterToContinue() {
+    std::cout << "Нажмите Enter, чтобы продолжить...";
+    std::cin.get();
 }
 
 void ConsoleView::gameIsOver() {

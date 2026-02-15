@@ -1,5 +1,9 @@
 #include "BattleShip.h"
 
-BattleShip::BattleShip(int type){
-    AIGame = (type == 1 ? std::make_unique<GameVsAI>() : nullptr);
+BattleShip::BattleShip(int type, bool needPlacement) {
+    if (type == 1) {
+        AIGame = std::make_unique<GameVsAI>(needPlacement);
+    } else {
+        AIGame = nullptr;
+    }
 }
