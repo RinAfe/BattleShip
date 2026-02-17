@@ -30,36 +30,37 @@ int main() {
         GLOBAL_CONSOLE.showMainMenu();
         int mode;
         std::cin >> mode;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         if (mode == 0) {
-            std::cout << "Выход из игры." << std::endl;
+            GLOBAL_CONSOLE.exitFromGame();
             break;
         }
         else if (mode == 1) {
-            BattleShip game(1, true); // true - нужна расстановка кораблей
+            // Новая игра с компьютером
+            BattleShip game(1, true);
 
             int activeGameId = gameSaver.createNewGame(
                 playerId,
-                0, // AI
+                0,
                 "AI",
                 *game.AIGame->CustomPlayer1->customPlayerBoard,
                 *game.AIGame->AIPlayer1->AIBoard,
-                playerId // первый ход за игроком
+                playerId
             );
 
             if (activeGameId == -1) {
-                std::cout << "Ошибка создания игры!" << std::endl;
+                GLOBAL_CONSOLE.errorCreateGame();
                 continue;
             }
 
             while (!game.AIGame->gameIsOver()) {
-                system("clear");
 
-                GLOBAL_CONSOLE.printBoards(
-                    game.AIGame->CustomPlayer1->customPlayerBoard,
-                    game.AIGame->AIPlayer1->AIBoard
-                );
+                if (game.AIGame->currentTurn == 1) {
+                    GLOBAL_CONSOLE.printBoards(
+                        game.AIGame->CustomPlayer1->customPlayerBoard,
+                        game.AIGame->AIPlayer1->AIBoard
+                    );
+                }
 
                 game.AIGame->newMove();
 
@@ -69,19 +70,20 @@ int main() {
                     game.AIGame->currentTurn);
             }
 
+            // Игра завершена - определяем победителя
             std::string winner;
             if (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() == 10) {
-                winner = "Bot"; // Победил компьютер
+                winner = "Bot";
             } else {
-                winner = player1Auth.getSession().name; // Победил игрок
+                winner = player1Auth.getSession().name;
             }
 
+            // Завершаем игру
             auto savedGame = gameSaver.loadGameById(activeGameId);
             if (savedGame) {
                 gameSaver.finishGame(savedGame->gameRecordId, winner);
             }
 
-            system("clear");
             GLOBAL_CONSOLE.printBoards(
                 game.AIGame->CustomPlayer1->customPlayerBoard,
                 game.AIGame->AIPlayer1->AIBoard
@@ -93,7 +95,7 @@ int main() {
             // Игра с человеком (PvP)
             GLOBAL_CONSOLE.player2Welcome();
             if (!player2Auth.authenticate()) {
-                std::cout << "Не удалось авторизовать второго игрока." << std::endl;
+                GLOBAL_CONSOLE.player2AuthFailed();
                 GLOBAL_CONSOLE.pressEnterToContinue();
                 continue;
             }
@@ -101,15 +103,15 @@ int main() {
             int player2Id = player2Auth.getSession().playerId;
             GLOBAL_CONSOLE.bothPlayersAuthorized();
 
-            std::cout << "\nИгрок 1: " << player1Auth.getSession().name
-                      << " (ID: " << playerId << ")" << std::endl;
-            std::cout << "Игрок 2: " << player2Auth.getSession().name
-                      << " (ID: " << player2Id << ")" << std::endl;
+            GLOBAL_CONSOLE.showPlayerInfo(
+                player1Auth.getSession().name, playerId,
+                player2Auth.getSession().name, player2Id
+            );
 
-            std::cout << "\nРежим 'Игрок против Игрока' в разработке..." << std::endl;
-            GLOBAL_CONSOLE.pressEnterToContinue();
+            GLOBAL_CONSOLE.pvpModeInDevelopment();
         }
         else if (mode == 3) {
+            // Список активных игр
             auto games = gameSaver.getActiveGames(playerId);
 
             if (games.empty()) {
@@ -134,23 +136,28 @@ int main() {
                 if (selectedGame.gameType == "AI") {
                     auto savedGame = gameSaver.loadGameById(selectedGame.gameId);
                     if (savedGame) {
-
+                        // Создаем игру БЕЗ расстановки кораблей
                         BattleShip game(1, false);
 
-                        game.AIGame->CustomPlayer1->customPlayerBoard = savedGame->player1Board->clone();
-                        game.AIGame->AIPlayer1->AIBoard = savedGame->player2Board->clone();
+                        // Копируем сохраненные доски
+                        game.AIGame->CustomPlayer1->customPlayerBoard =
+                            std::make_unique<Board>(*savedGame->player1Board);
+                        game.AIGame->AIPlayer1->AIBoard =
+                            std::make_unique<Board>(*savedGame->player2Board);
                         game.AIGame->currentTurn = (selectedGame.isMyTurn ? 1 : 2);
 
                         GLOBAL_CONSOLE.messageExistingGame();
                         GLOBAL_CONSOLE.pressEnterToContinue();
 
+                        // Игровой цикл
                         while (!game.AIGame->gameIsOver()) {
-                            system("clear");
 
-                            GLOBAL_CONSOLE.printBoards(
-                                game.AIGame->CustomPlayer1->customPlayerBoard,
-                                game.AIGame->AIPlayer1->AIBoard
-                            );
+                            if (game.AIGame->currentTurn == 1) {
+                                GLOBAL_CONSOLE.printBoards(
+                                    game.AIGame->CustomPlayer1->customPlayerBoard,
+                                    game.AIGame->AIPlayer1->AIBoard
+                                );
+                            }
 
                             game.AIGame->newMove();
 
@@ -160,7 +167,7 @@ int main() {
                                 game.AIGame->currentTurn);
                         }
 
-                        // Игра завершена - определяем победителя
+                        // Определяем победителя
                         std::string winner;
                         if (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() == 10) {
                             winner = "Bot";
@@ -170,6 +177,7 @@ int main() {
 
                         gameSaver.finishGame(savedGame->gameRecordId, winner);
 
+                        // Финальная очистка и показ
                         system("clear");
                         GLOBAL_CONSOLE.printBoards(
                             game.AIGame->CustomPlayer1->customPlayerBoard,
@@ -179,7 +187,7 @@ int main() {
                         GLOBAL_CONSOLE.pressEnterToContinue();
                     }
                 } else {
-                    std::cout << "Продолжение PvP игры в разработке..." << std::endl;
+                    GLOBAL_CONSOLE.pvpModeInDevelopment();
                     GLOBAL_CONSOLE.pressEnterToContinue();
                 }
             }

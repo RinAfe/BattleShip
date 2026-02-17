@@ -54,35 +54,30 @@ bool CustomPlayer::isValidInput(const std::string& input) {
 }
 
 void CustomPlayer::makeMove(Board& enemyBoard) {
-    bool continueTurn = true;
+    std::string input;
+    bool validMove = false;
 
-    while (continueTurn) {
-        std::string input;
-        bool validMove = false;
+    while (!validMove) {
+        consolePlayer->inputCoordinates();
+        std::cin >> input;
 
-        while (!validMove) {
-            consolePlayer->inputCoordinates();
-            std::cin >> input;
-
-            if (!isValidInput(input)) {
-                consolePlayer->incorrectForm();
-                continue;
-            }
-
-            auto [r, c] = parseInput(input);
-
-            char cell = enemyBoard.cellAt(r, c);
-            if (cell == 'X' || cell == 'O') {
-                consolePlayer->alreadyShoot();
-                continue;
-            }
-
-            ShotResult result = enemyBoard.shoot(r, c);
-            consolePlayer->showResult(result);
-            validMove = true;
-
-            continueTurn = (result == ShotResult::Hit || result == ShotResult::Kill);
+        if (!isValidInput(input)) {
+            consolePlayer->incorrectForm();
+            continue;
         }
+
+        auto [r, c] = parseInput(input);
+
+        char cell = enemyBoard.cellAt(r, c);
+        if (cell == 'X' || cell == 'O') {
+            consolePlayer->alreadyShoot();
+            continue;
+        }
+
+        ShotResult result = enemyBoard.shoot(r, c);
+        consolePlayer->showResult(result);
+
+        return;
     }
 }
 
