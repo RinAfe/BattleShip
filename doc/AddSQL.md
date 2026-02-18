@@ -877,11 +877,4 @@ graph TD
     GameOver --> UpdateStats[ОБНОВЛЕНИЕ СТАТИСТИКИ]
     UpdateStats --> MainMenu
     
-    style Start fill:#9f9,stroke:#333,stroke-width:2px
-    style Register fill:#bbf,stroke:#333
-    style Login fill:#bbf,stroke:#333
-    style BotGame fill:#f9f,stroke:#333
-    style PvPGame fill:#f9f,stroke:#333
-    style SaveGame fill:#ff9,stroke:#333,stroke-width:2px
-    style UpdateStats fill:#9cf,stroke:#333
 ```
