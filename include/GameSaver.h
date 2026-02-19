@@ -49,6 +49,7 @@ public:
 
     bool deleteActiveGame(int activeGameId);
 
-    // Проверить наличие активной игры
     bool hasActiveGame(int player1Id, int player2Id);
+
+    void updatePlayerStats(int playerId, bool playerWon);
 };

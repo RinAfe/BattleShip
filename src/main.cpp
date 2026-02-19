@@ -75,7 +75,7 @@ int main() {
             std::string winner = playerWon ? player1Auth.getSession().name : "Bot";
 
             // Обновляем статистику игрока
-            BattleShip::updatePlayerStats(conn, playerId, playerWon);
+            gameSaver.updatePlayerStats(playerId, playerWon);
 
             // Завершаем игру
             auto savedGame = gameSaver.loadGameById(activeGameId);
@@ -170,8 +170,7 @@ int main() {
                         bool playerWon = (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() != 10);
                         std::string winner = playerWon ? player1Auth.getSession().name : "Bot";
 
-                        // Обновляем статистику игрока
-                        BattleShip::updatePlayerStats(conn, playerId, playerWon);
+                        gameSaver.updatePlayerStats(playerId, playerWon);
 
                         // Завершаем игру
                         auto savedGame = gameSaver.loadGameById(selectedGame.gameId);
