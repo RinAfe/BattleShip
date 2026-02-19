@@ -71,12 +71,11 @@ int main() {
             }
 
             // Игра завершена - определяем победителя
-            std::string winner;
-            if (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() == 10) {
-                winner = "Bot";
-            } else {
-                winner = player1Auth.getSession().name;
-            }
+            bool playerWon = (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() != 10);
+            std::string winner = playerWon ? player1Auth.getSession().name : "Bot";
+
+            // Обновляем статистику игрока
+            BattleShip::updatePlayerStats(conn, playerId, playerWon);
 
             // Завершаем игру
             auto savedGame = gameSaver.loadGameById(activeGameId);
@@ -168,14 +167,17 @@ int main() {
                         }
 
                         // Определяем победителя
-                        std::string winner;
-                        if (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() == 10) {
-                            winner = "Bot";
-                        } else {
-                            winner = player1Auth.getSession().name;
-                        }
+                        bool playerWon = (game.AIGame->CustomPlayer1->customPlayerBoard->getCountShipSunk() != 10);
+                        std::string winner = playerWon ? player1Auth.getSession().name : "Bot";
 
-                        gameSaver.finishGame(savedGame->gameRecordId, winner);
+                        // Обновляем статистику игрока
+                        BattleShip::updatePlayerStats(conn, playerId, playerWon);
+
+                        // Завершаем игру
+                        auto savedGame = gameSaver.loadGameById(selectedGame.gameId);
+                        if (savedGame) {
+                            gameSaver.finishGame(savedGame->gameRecordId, winner);
+                        }
 
                         // Финальная очистка и показ
                         system("clear");
