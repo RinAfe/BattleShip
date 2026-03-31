@@ -184,6 +184,73 @@ void Board::markAroundSunkShip(const std::vector<std::pair<int, int>>& shipCells
     }
 }
 
-void Board::customPlacement() {
+std::string Board::serialize() const {
+    std::string result;
+    result.reserve(100);
 
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            result += board[i][j];
+        }
+    }
+    return result;
+}
+
+void Board::deserialize(const std::string& data) {
+    if (data.length() != 100) {
+        // Если длина не 100, что-то пошло не так
+        clear();
+        return;
+    }
+
+    int index = 0;
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            board[i][j] = data[index++];
+        }
+    }
+
+    // Пересчитываем количество потопленных кораблей
+    countShipsSunk = 0;
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            if (board[i][j] == 'X') {
+                // Проверяем, потоплен ли корабль
+                std::vector<std::pair<int, int>> shipCells;
+                findConnectedShip(i, j, shipCells);
+
+                bool isSunk = true;
+                for (const auto& [r, c] : shipCells) {
+                    if (board[r][c] == '#') {
+                        isSunk = false;
+                        break;
+                    }
+                }
+                if (isSunk && !shipCells.empty()) {
+                    // Убеждаемся, что мы не посчитали один корабль дважды
+                    bool alreadyCounted = false;
+                    for (const auto& [r, c] : shipCells) {
+                        if (r < i || (r == i && c < j)) {
+                            alreadyCounted = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyCounted) {
+                        countShipsSunk++;
+                    }
+                }
+            }
+        }
+    }
+}
+
+std::unique_ptr<Board> Board::clone() const {
+    auto newBoard = std::make_unique<Board>();
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            newBoard->board[i][j] = board[i][j];
+        }
+    }
+    newBoard->countShipsSunk = countShipsSunk;
+    return newBoard;
 }

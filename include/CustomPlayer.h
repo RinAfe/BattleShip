@@ -1,16 +1,18 @@
 #pragma once
-#include "Player.h"
 
-class CustomPlayer : public Player {
+#include "Board.h"
+#include "ConsoleView.h"
+#include <memory>
+
+class CustomPlayer {
 public:
     std::unique_ptr<Board> customPlayerBoard;
+    std::unique_ptr<ConsoleView> consolePlayer;
 
-    CustomPlayer();
-
-    void makeMove(Board& enemyBoard) override;
+    CustomPlayer(bool needPlacement = true);
+    void makeMove(Board& enemyBoard);
     void manualShipPlacement();
 
-    std::unique_ptr<ConsoleView> consolePlayer = std::make_unique<ConsoleView>();
 private:
     std::pair<int, int> parseInput(const std::string& input);
     bool isValidInput(const std::string& input);

@@ -1,11 +1,12 @@
+#pragma once
+
 #include "GameVsAI.h"
-#include "GameVsCustom.h"
+#include <memory>
 
 class BattleShip {
 public:
     std::unique_ptr<GameVsAI> AIGame;
-    //std::unique_ptr<GameVsCustom> CustomPlayersGame;
 
-    BattleShip(int type);
+    BattleShip(int type, bool needPlacement = true);
 
 };

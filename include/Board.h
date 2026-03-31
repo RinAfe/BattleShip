@@ -17,7 +17,10 @@ class Board {
     int countShipsSunk = 0;
 
     void markAroundSunkShip(const std::vector<std::pair<int, int>>& shipCells);
+
 public:
+    std::unique_ptr<Board> clone() const;
+
     Board();
 
     int getCountShipSunk();
@@ -31,5 +34,8 @@ public:
     char cellAt(int r, int c) const;
     bool isShipSunk(int r, int c);
     void findConnectedShip(int r, int c, std::vector<std::pair<int, int>>& shipCages);
+
+    std::string serialize() const;
+    void deserialize(const std::string& data);
 
 };
